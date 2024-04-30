@@ -1,0 +1,40 @@
+kind: pipeline
+name: default
+
+workspace:
+  path: /source
+
+steps:
+  - name: build-p01
+    image: plugins/docker
+    settings:
+      username: p01
+      password:
+        from_secret: P01_DOCKER_PASSWORD
+      repo: docker.p01.cc/socat
+      tags:
+        - latest
+      registry: docker.p01.cc
+
+  - name: build-official
+    image: plugins/docker
+    settings:
+      username: paperplanecc
+      password:
+        from_secret: DOCKER_PASSWORD
+      repo: paperplanecc/socat
+      tags:
+        - latest
+
+  - name: push-readme-official
+    image: chko/docker-pushrm:1
+    environment:
+      DOCKER_USER: paperplanecc
+      DOCKER_PASS:
+        from_secret: DOCKER_PASSWORD
+      PUSHRM_SHORT: Provide the command line tool socat.
+      PUSHRM_TARGET: docker.io/paperplanecc/socat
+
+trigger:
+  branch:
+    - master
